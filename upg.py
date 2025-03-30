@@ -78,7 +78,8 @@ def generate_passwords(data, min_length):
                 passwords.add("_".join(perm))
 
     # Datumsvarianten (DD/MM/YYYY)
-    for date in [split_date(data["birth_date"]), split_date(data["partner_birth_date"]), split_date(data["pet_birth_date"])]:
+    # Entferne pet_birth_date, da es nicht im data-Dictionary existiert
+    for date in [split_date(data["birth_date"]), split_date(data["partner_birth_date"]), split_date(data["child_birth_date"])]:
         if date:
             day, month, year = date["day"], date["month"], date["year"]
             passwords.add(day)
