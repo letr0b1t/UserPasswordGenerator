@@ -14,71 +14,57 @@ def print_header():
     """
     print(header)
 
-# Funktion zum Zerlegen eines Datums im Format DD/MM/YYYY
 def split_date(date_str):
     if not date_str:
         return None
     day, month, year = date_str.split("/")
     return {"day": day, "month": month, "year": year}
 
-# Monatsnamen für Passwortmuster
 MONTHS = {
     "01": "January", "02": "February", "03": "March", "04": "April",
     "05": "May", "06": "June", "07": "July", "08": "August",
     "09": "September", "10": "October", "11": "November", "12": "December"
 }
 
-# Funktion zum Generieren von Passwörtern
 def generate_passwords(data, min_length):
-    # Nur Strings aus data holen, keywords separat behandeln
     words = [data[key] for key in data if key not in ["birth_date", "partner_birth_date", "pet_birth_date", "min_length", "keywords"] and data[key]]
-    # Keywords separat hinzufügen
     if data["keywords"]:
         words.extend(data["keywords"])
     passwords = set()
 
-    # Alle Permutationen (max. 3 Wörter)
     for r in range(1, min(4, len(words) + 1)):
         for perm in itertools.permutations(words, r):
             base = "".join(perm)
             passwords.add(base)
             
-            # Groß-/Kleinschreibung
             passwords.add(base.lower())
             passwords.add(base.capitalize())
             passwords.add("".join(w.capitalize() for w in perm))
             
-            # Sonderzeichen
             for suffix in ["!", "@", "#", "$", "%"]:
                 passwords.add(base + suffix)
                 passwords.add(base.lower() + suffix)
                 passwords.add("".join(w.capitalize() for w in perm) + suffix)
             
-            # Zufallszahlen
             for _ in range(3):
                 num = str(random.randint(0, 999))
                 passwords.add(base + num)
                 passwords.add(base.lower() + num)
                 passwords.add("".join(w.capitalize() for w in perm) + num)
             
-            # Erweiterte Leet-Mode
             leet_base = base.replace("a", "4").replace("e", "3").replace("i", "1").replace("o", "0").replace("s", "5")\
                            .replace("t", "7").replace("l", "1").replace("b", "8").replace("z", "2")
             passwords.add(leet_base)
             passwords.add(leet_base + "!1")
             passwords.add(leet_base + str(random.randint(0, 99)))
-            # Zusätzliche Leet-Variationen
             leet_partial = base.replace("a", "4").replace("s", "5")
             passwords.add(leet_partial)
             
-            # Trennzeichen
             if len(perm) > 1:
                 passwords.add("-".join(perm))
                 passwords.add(".".join(perm))
                 passwords.add("_".join(perm))
 
-    # Datumsvarianten (DD/MM/YYYY)
-    # Entferne pet_birth_date, da es nicht im data-Dictionary existiert
     for date in [split_date(data["birth_date"]), split_date(data["partner_birth_date"]), split_date(data["child_birth_date"])]:
         if date:
             day, month, year = date["day"], date["month"], date["year"]
@@ -96,23 +82,20 @@ def generate_passwords(data, min_length):
             passwords.add(base + day + month + year)
             passwords.add(f"{day}-{month}-{year}")
             passwords.add(f"{year}/{month}/{day}")
-            # Monatsnamen
+
             if month in MONTHS:
                 passwords.add(MONTHS[month])
                 passwords.add(base + MONTHS[month])
 
-    # Häufige Passwortmuster
     common_patterns = ["1234", "0000", "!@#", "qwerty"]
     for pattern in common_patterns:
         passwords.add(base + pattern)
         passwords.add(base.lower() + pattern)
         passwords.add("".join(w.capitalize() for w in perm) + pattern)
 
-    # Filter nach Mindestlänge
     filtered_passwords = [pwd for pwd in passwords if len(pwd) >= min_length]
     return filtered_passwords
 
-# Interaktives "Interview" mit Mindestlänge
 def collect_data():
     data = {
         "first_name": "",
@@ -158,7 +141,6 @@ def collect_data():
     
     return data
 
-# Hauptprogramm
 def main():
     print_header()
     data = collect_data()
